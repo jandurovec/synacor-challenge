@@ -12,3 +12,6 @@ After implementing the remaining instructions the VM passes the self-test and yi
 
 ## Code 4: Tablet
 Picking up and using tablet in the first location yields the fourth code.
+
+## Code 5: Twisty passages
+Exploring the map yields the fifth code

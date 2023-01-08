@@ -133,6 +133,22 @@ fun main() {
     val commands = buildString {
         appendLine("take tablet")
         appendLine("use tablet")
+        appendLine("go doorway")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go bridge")
+        appendLine("go continue")
+        appendLine("go down")
+        appendLine("go east")
+        appendLine("take empty lantern")
+        appendLine("go west")
+        appendLine("go west")
+        appendLine("go passage")
+        appendLine("go ladder")
+        appendLine("go west")
+        appendLine("go north")
+        appendLine("go south")
+        appendLine("go north")
     }
 
     run(program, commands)
