@@ -9,3 +9,6 @@ second code.
 
 ## Code 3: Self-test
 After implementing the remaining instructions the VM passes the self-test and yields the third code.
+
+## Code 4: Tablet
+Picking up and using tablet in the first location yields the fourth code.

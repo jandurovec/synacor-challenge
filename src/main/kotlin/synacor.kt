@@ -2,14 +2,14 @@ import java.io.File
 import java.util.*
 
 fun main() {
-    fun run(program: IntArray) {
+    fun run(program: IntArray, input: String = "") {
         val mem = program.copyOf(32776)
         var programCounter = 0
         val stack: ArrayDeque<Int> = ArrayDeque()
 
         fun getValue(v: Int) = if (v <= 32767) v else if (v <= 32775) mem[v] else error("Invalid value $v")
 
-        var inputBuffer = ""
+        var inputBuffer = input
         var inputIndex = 0
 
         while (true) {
@@ -130,5 +130,10 @@ fun main() {
             it[0].toUByte().toInt() + (it[1].toUByte().toInt() shl 8)
         }.toIntArray()
 
-    run(program)
+    val commands = buildString {
+        appendLine("take tablet")
+        appendLine("use tablet")
+    }
+
+    run(program, commands)
 }
