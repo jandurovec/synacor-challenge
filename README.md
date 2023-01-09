@@ -125,3 +125,28 @@ stack size (20Mb was enough).
 
 After finding the correct teleporter energy level and rewriting the `call` (and its argument) with `noop`, teleportation
 yields the correct code.
+
+## Code 8: Vault
+The final puzzle is to figure out the shortest path through a maze with the orb, where transitions between rooms apply
+mathematical operations to the orb (sequentially, no operator priorities). The orb weight must not be negative at any
+point in time (the orb evaporates) and it needs to have a value of 30 on entering the last room before vault.
+
+The maze is as follows:
+
+```
+[*][8][- ][1E]
+[4][*][11][* ]
+[+][4][- ][18]
+[S][-][9 ][* ]
+```
+
+The orb starts in the lower left corner (room "S") with weight of 22 and visiting this room always resets the weight
+(i.e. visiting it has the same effect as restarting the journey).
+
+I've written the `OrbPathCalculator` to perform a simple BFS. I was thinking about adding some concept of "visited"
+cache tracking if we've already been in a given room with the orb of a particular value to remove the loops, however,
+the search algorithm finished fast and no such optimizations were needed.
+
+The vault contained a mirror, which, when used, yielded the last code. However, given the fact that the code has been
+seen in the mirror, it needed to be mirrored to get the real one (i.e. not only reversing the order but also mapping
+p to q, etc.)

@@ -1,156 +1,21 @@
 import java.io.File
-import java.util.*
 
 fun main() {
-    class VirtualMachine(program: IntArray) {
-        val mem = program.copyOf(32776)
-        var programCounter = 0
-        val stack: ArrayDeque<Int> = ArrayDeque()
-
-        fun run(input: String = "", interactive: Boolean = false) {
-
-            fun getValue(v: Int) = if (v <= 32767) v else if (v <= 32775) mem[v] else error("Invalid value $v")
-
-            var inputBuffer = input
-            var inputIndex = 0
-
-            while (true) {
-                if (programCounter == 5489) {
-                    // skip teleport validation
-                    mem[32768] = 6
-                    programCounter = 5491
-                }
-                when (mem[programCounter]) {
-                    0 -> break
-                    1 -> {
-                        mem[mem[programCounter + 1]] = getValue(mem[programCounter + 2])
-                        programCounter += 3
-                    }
-
-                    2 -> {
-                        stack.push(getValue(mem[programCounter + 1]))
-                        programCounter += 2
-                    }
-
-                    3 -> {
-                        if (stack.isEmpty()) error("Empty stack")
-                        mem[mem[programCounter + 1]] = stack.pop()
-                        programCounter += 2
-                    }
-
-                    4 -> {
-                        mem[mem[programCounter + 1]] =
-                            if (getValue(mem[programCounter + 2]) == getValue(mem[programCounter + 3])) 1 else 0
-                        programCounter += 4
-                    }
-
-                    5 -> {
-                        mem[mem[programCounter + 1]] =
-                            if (getValue(mem[programCounter + 2]) > getValue(mem[programCounter + 3])) 1 else 0
-                        programCounter += 4
-                    }
-
-                    6 -> programCounter = getValue(mem[programCounter + 1])
-                    7 -> programCounter =
-                        if (getValue(mem[programCounter + 1]) != 0) getValue(mem[programCounter + 2]) else programCounter + 3
-
-                    8 -> programCounter =
-                        if (getValue(mem[programCounter + 1]) == 0) getValue(mem[programCounter + 2]) else programCounter + 3
-
-                    9 -> {
-                        mem[mem[programCounter + 1]] =
-                            (getValue(mem[programCounter + 2]) + getValue(mem[programCounter + 3])) % 32768
-                        programCounter += 4
-                    }
-
-                    10 -> {
-                        mem[mem[programCounter + 1]] =
-                            (getValue(mem[programCounter + 2]) * getValue(mem[programCounter + 3])) % 32768
-                        programCounter += 4
-                    }
-
-                    11 -> {
-                        mem[mem[programCounter + 1]] =
-                            getValue(mem[programCounter + 2]) % getValue(mem[programCounter + 3])
-                        programCounter += 4
-                    }
-
-                    12 -> {
-                        mem[mem[programCounter + 1]] =
-                            getValue(mem[programCounter + 2]) and getValue(mem[programCounter + 3])
-                        programCounter += 4
-                    }
-
-                    13 -> {
-                        mem[mem[programCounter + 1]] =
-                            getValue(mem[programCounter + 2]) or getValue(mem[programCounter + 3])
-                        programCounter += 4
-                    }
-
-                    14 -> {
-                        mem[mem[programCounter + 1]] = getValue(mem[programCounter + 2]).inv() and 0x7fff
-                        programCounter += 3
-                    }
-
-                    15 -> {
-                        mem[mem[programCounter + 1]] = mem[getValue(mem[programCounter + 2])]
-                        programCounter += 3
-                    }
-
-                    16 -> {
-                        mem[getValue(mem[programCounter + 1])] = getValue(mem[programCounter + 2])
-                        programCounter += 3
-                    }
-
-                    17 -> {
-                        //println("Calling ${getValue(mem[programCounter + 1])} at ${programCounter}")
-                        stack.push(programCounter + 2)
-                        programCounter = getValue(mem[programCounter + 1])
-                    }
-
-                    18 -> {
-                        if (stack.isEmpty()) break
-                        programCounter = stack.pop()
-                    }
-
-                    19 -> {
-                        print(getValue(mem[programCounter + 1]).toChar())
-                        programCounter += 2
-                    }
-
-                    20 -> {
-                        if (inputIndex == inputBuffer.length) {
-                            if (interactive) {
-                                inputBuffer = readln() + '\n'
-                                inputIndex = 0
-                            } else {
-                                break
-                            }
-                        }
-                        mem[mem[programCounter + 1]] = inputBuffer[inputIndex++].code
-                        programCounter += 2
-                    }
-
-                    21 -> programCounter++
-                    else -> error("${mem[programCounter]} not implemented yet")
-                }
-            }
-        }
-    }
-
     val program = File("challenge.bin").readBytes()
         .asList().chunked(2).map {
             it[0].toUByte().toInt() + (it[1].toUByte().toInt() shl 8)
         }.toIntArray()
 
-    var commands = buildString {
+    val vm = VirtualMachine(program)
+
+    vm.run(buildString {
         appendLine("take tablet")
         appendLine("use tablet")
         appendLine("go doorway")
         appendLine("go north")
         appendLine("go north")
         appendLine("go bridge")
-        appendLine("go continue")
+        appendLine("continue")
         appendLine("go down")
         appendLine("go east")
         appendLine("take empty lantern")
@@ -159,7 +24,6 @@ fun main() {
         appendLine("go passage")
         appendLine("go ladder")
         appendLine("go west")
-        appendLine("go north")
         appendLine("go south")
         appendLine("go north")
         appendLine("take can")
@@ -168,7 +32,7 @@ fun main() {
         appendLine("go ladder")
         appendLine("use lantern")
         appendLine("go darkness")
-        appendLine("go continue")
+        appendLine("continue")
         appendLine("go west")
         appendLine("go west")
         appendLine("go west")
@@ -205,16 +69,35 @@ fun main() {
         appendLine("look business card")
         appendLine("take strange book")
         appendLine("look strange book")
-    }
-
-    val vm = VirtualMachine(program)
-    vm.run(commands)
+    })
 
     vm.mem[32775] = 25734 // calculated by teleporter.kt
     vm.mem[5489] = 21 // skip teleporter confirmation
     vm.mem[5490] = 21 // skip teleporter confirmation
-    commands = buildString {
+
+    vm.run(buildString {
         appendLine("use teleporter")
-    }
-    vm.run(commands)
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("go east")
+        appendLine("take journal")
+        appendLine("look journal")
+        appendLine("go west")
+        appendLine("go north")
+        appendLine("go north")
+        appendLine("take orb")
+    })
+
+    vm.run(OrbPathCalculator().calculate())
+
+    vm.run(buildString {
+        appendLine("go vault")
+        appendLine("take mirror")
+        appendLine("use mirror")
+    })
 }
